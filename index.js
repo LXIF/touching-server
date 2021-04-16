@@ -32,11 +32,10 @@ io.on('connection', (socket) => {
         const andriIndex = andris.findIndex((andri) => {
             return andri.socket === socket.id;
         });
-        console.log('andriIndex ' + andriIndex);
         if(andriIndex !== -1) {
             andris.splice(andriIndex, 1);
-            console.log('andri ' + socket.id + ' disconnected');
-            console.log('andris: ', andris);
+            // console.log('andri ' + socket.id + ' disconnected');
+            // console.log('andris: ', andris);
         }
     }
 
@@ -63,6 +62,14 @@ io.on('connection', (socket) => {
         }
     }
 
+    function updateClientsAtAndri() {
+        io.to('andris').emit('updateUsers', [
+            ...users,
+            ...andris,
+            ...rafals
+        ]);
+    }
+
     //handshakeish
 
     socket.on('howdy', (message) => {
@@ -75,12 +82,14 @@ io.on('connection', (socket) => {
                 ...message,
                 socket: socket.id
             });
+            socket.join('andris');
         } else if(message.id === 'rafal') {
             removeRafal(socket);
             rafals.push({
                 ...message,
                 socket: socket.id
             });
+            socket.join('rafals');
             // console.log(rafals);
         } else {
             removeUser(socket);
@@ -88,23 +97,25 @@ io.on('connection', (socket) => {
                 ...message,
                 socket: socket.id
             });
+            socket.join('users');
             // console.log(user);
         }
-        for(const andri in andris) {
-            io.to(andris[andri].socket).emit('updateUsers', [
-                ...users,
-                ...andris,
-                ...rafals
-            ]);
-        }
+        updateClientsAtAndri()
         console.log(users);
     });
 
-    //simple presence
+    //local presence
 
     socket.on('presence', (presence) => {
-        console.log(presence);
+        // console.log(presence);
         socket.broadcast.emit('presence', presence);
+    });
+
+    //global weather
+
+    socket.on('weather', (weather) => {
+        // console.log(weather);
+        socket.broadcast.emit('weather', weather);
     });
 
 
@@ -116,6 +127,8 @@ io.on('connection', (socket) => {
         removeUser(socket);
         removeAndri(socket);
         removeRafal(socket);
+
+        updateClientsAtAndri()
     });
 });
 
