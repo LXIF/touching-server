@@ -28,6 +28,8 @@ let rafals = [];
 
 io.on('connection', (socket) => {
 
+    console.log('new connection:' + socket.id);
+
     function removeAndri(socket) {
         const andriIndex = andris.findIndex((andri) => {
             return andri.socket === socket.id;
@@ -116,6 +118,25 @@ io.on('connection', (socket) => {
     socket.on('weather', (weather) => {
         // console.log(weather);
         socket.broadcast.emit('weather', weather);
+    });
+
+    socket.on('chat', (message) => {
+        console.log(message);
+    });
+
+
+    socket.on('KnockKnock', (data) => {
+        console.log('knockknock');
+        socket.emit('WhosThere');
+    });
+
+    socket.on('ItsMe', (data) => {
+        socket.emit('Welcome', 'Hi customer using unity' + data.version + ', this is backend microservice ' + process.env.K8S_POD + '. Thanks for buying our asset. (No data is stored on our server)');
+        socket.emit('TechData', {
+			podName: process.env.K8S_POD,
+			timestamp: (new Date()).toUTCString()
+		});
+		socket.disconnect(true);
     });
 
 
