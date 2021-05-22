@@ -328,12 +328,22 @@ io.on('connection', (socket) => {
         // }
     });
 
-    socket.on('poem', (message) => {
-        if(message.outputusers) {
-            io.to('rafals').emit('poem', message);
+    socket.on('poem-mira', (message) => {
+        console.log(message);
+        if(message.outputRafals) {
+            io.to('rafals').emit('poem-mira', message);
         }
         if(message.outputUsers) {
-            io.to('users').emit('poem', message);
+            io.to('users').emit('poem-mira', message);
+        }
+    });
+    socket.on('poem-rafal', (message) => {
+        console.log(message);
+        if(message.outputRafals) {
+            io.to('rafals').emit('poem-rafal', message);
+        }
+        if(message.outputUsers) {
+            io.to('users').emit('poem-rafal', message);
         }
     });
 
